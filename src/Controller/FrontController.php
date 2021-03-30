@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Category;
-use App\Utils\CategoryTreeFrontend;
+use App\Utils\CategoryTreeFrontPage;
 
 class FrontController extends AbstractController
 {
@@ -21,10 +21,10 @@ class FrontController extends AbstractController
     /**
      * @Route("/video-list/{categoryname},{categoryid}", name="video_list")
      */
-    public function videoList($categoryid, CategoryTreeFrontend $categories): Response
+    public function videoList($categoryid, CategoryTreeFrontPage $categories): Response
     {
-        dump($categories->categoriesArrayFromDb+);
-        return $this->render('front/video_list.html.twig');
+        $categories->getCategoryListAndParent($categoryid);
+        return $this->render('front/video_list.html.twig', ['subcategories' => $categories]);
     }
 
     
