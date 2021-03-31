@@ -2,8 +2,8 @@
 
 namespace App\Utils;
 
+use App\Utils\AbstractClasses\CategoryTreeAbstract;
 use App\Twig\AppExtension;
-use App\Utils\AbstractController\CategoryTreeAbstract;
 
 class CategoryTreeFrontPage extends CategoryTreeAbstract
 {
@@ -16,35 +16,33 @@ class CategoryTreeFrontPage extends CategoryTreeAbstract
     public $html_6 = '</li>';
     public $html_7 = '</ul>';
 
-
-    public function getCategoryList(array $array_categories)
+    public function getCategoryListAndParent(int $id): string
     {
-        $this->categorylist  .= $this->html_1;
-        foreach ($array_categories as $value) {
+        $this->slugger = new AppExtension; // Twig extension to slugify url's for categories
+        $parentData = $this->getMainParent($id); // main parent of subcategory
+        $this->mainParentName = $parentData['name']; // for accesing in view
+        $this->mainParentId = $parentData['id']; // for accesing in view
+        $key = array_search($id, array_column($this->categoriesArrayFromDb, 'id'));
+        $this->currentCategoryName = $this->categoriesArrayFromDb[$key]['name']; // for accesing in view
+        $categories_array = $this->buildTree($parentData['id']); // builds array for generating nested html list
+        return $this->getCategoryList($categories_array);
+    }
+
+    public function getCategoryList(array $categories_array)
+    {
+        $this->categorylist .= $this->html_1;
+        foreach ($categories_array as $value) {
             $catName = $this->slugger->slugify($value['name']);
-            $url = $this->urlGenerator->generate('video_list', ['categoryname' => $catName, 'categoryid' => $value['id']]);
-            $this->categorylist .= $this->html_2 . $this->html_3 . $url . $this->html_4 . $catName . $this->html_5;
+
+            $url = $this->urlgenerator->generate('video_list', ['categoryname' => $catName, 'id' => $value['id']]);
+            $this->categorylist .= $this->html_2 . $this->html_3 . $url . $this->html_4 . $value['name'] . $this->html_5;
             if (!empty($value['children'])) {
                 $this->getCategoryList($value['children']);
             }
-            $this->categorylist  .= $this->html_6;
+            $this->categorylist .= $this->html_6;
         }
-        $this->categorylist  .= $this->html_7;
+        $this->categorylist .= $this->html_7;
         return $this->categorylist;
-    }
-
-    public function getCategoryListAndParent(int $id): string
-    {
-        $this->slugger = new AppExtension;
-        $parentData = $this->getMainParent($id);
-        $this->mainParentId = $parentData['id'];
-        $this->mainParentName = $parentData['name'];
-        $key = array_search($id, array_column($this->categoriesArrayFromDb, 'id'));
-        $this->currentCategoryName = $this->categoriesArrayFromDb[$key]['name'];
-
-        $categories_array = $this->buildTree($parentData['id']);
-
-        return $this->getCategoryList($categories_array);
     }
 
     public function getMainParent(int $id): array
@@ -55,7 +53,7 @@ class CategoryTreeFrontPage extends CategoryTreeAbstract
         } else {
             return [
                 'id' => $this->categoriesArrayFromDb[$key]['id'],
-                'name' => $this->categoriesArrayFromDb[$key]['name'],
+                'name' => $this->categoriesArrayFromDb[$key]['name']
             ];
         }
     }

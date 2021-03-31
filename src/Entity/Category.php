@@ -6,10 +6,13 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=CategoryRepository::class)
  * @ORM\Table(name="categories")
+ * @UniqueEntity("name")
  */
 class Category
 {
@@ -21,12 +24,14 @@ class Category
     private $id;
 
     /**
+     * @Assert\NotBlank(message = "The name of category is required")
      * @ORM\Column(type="string", length=45, unique=true)
      */
     private $name;
 
     /**
      * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="subcategories")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $parent;
 
@@ -35,9 +40,15 @@ class Category
      */
     private $subcategories;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Video", mappedBy="category")
+     */
+    private $videos;
+
     public function __construct()
     {
         $this->subcategories = new ArrayCollection();
+        $this->videos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -89,7 +100,8 @@ class Category
 
     public function removeSubcategory(self $subcategory): self
     {
-        if ($this->subcategories->removeElement($subcategory)) {
+        if ($this->subcategories->contains($subcategory)) {
+            $this->subcategories->removeElement($subcategory);
             // set the owning side to null (unless already changed)
             if ($subcategory->getParent() === $this) {
                 $subcategory->setParent(null);
@@ -98,4 +110,36 @@ class Category
 
         return $this;
     }
+
+    /**
+     * @return Collection|Video[]
+     */
+    public function getVideos(): Collection
+    {
+        return $this->videos;
+    }
+
+    public function addVideo(Video $video): self
+    {
+        if (!$this->videos->contains($video)) {
+            $this->videos[] = $video;
+            $video->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVideo(Video $video): self
+    {
+        if ($this->videos->contains($video)) {
+            $this->videos->removeElement($video);
+            // set the owning side to null (unless already changed)
+            if ($video->getCategory() === $this) {
+                $video->setCategory(null);
+            }
+        }
+
+        return $this;
+    }
 }
+

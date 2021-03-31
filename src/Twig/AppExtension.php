@@ -27,8 +27,9 @@ class AppExtension extends AbstractExtension
 
     public function slugify($string)
     {
-        $string = preg_replace("/ +/", "_", trim($string));
-        $string = mb_strtolower(preg_replace('/[^A-Za-z0-9-]+/', '', $string));
+        $string = preg_replace("/ +/", "-", trim($string));
+        $string = mb_strtolower(preg_replace('/[^A-Za-z0-9-]+/', '', $string), 'UTF-8');
         return $string;
     }
 }
+
