@@ -4,7 +4,6 @@ namespace App\Tests\Utils;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Twig\AppExtension;
-use App\Utils\CategoryTreeFrontPage;
 
 class CategoryTest extends KernelTestCase
 {
@@ -135,7 +134,7 @@ class CategoryTest extends KernelTestCase
     public function dataForCategoryTreeAdminList()
     {
         yield [
-            '<ul class="fa-ul text-left"><li><i class="fa-li fa fa-arrow-right"></i>  Toys<a href="/admin/edit-category/2"> Edit</a> <a onclick="return confirm(\'Are you sure?\');" href="/admin/delete-category/2">Delete</a></li></ul><ul class="fa-ul text-left"><li><i class="fa-li fa fa-arrow-right"></i>  Toys<a href="/admin/edit-category/2"> Edit</a> <a onclick="return confirm(\'Are you sure?\');" href="/admin/delete-category/2">Delete</a></li></ul>', [['id' => 2, 'parent_id' => null, 'name' => 'Toys']]
+            '<ul class="fa-ul text-left"><li><i class="fa-li fa fa-arrow-right"></i>  Toys<a href="/admin/edit-category/2"> Edit</a> <a onclick="return confirm(\'Are you sure?\');" href="/admin/delete-category/2">Delete</a></li></ul>', [['id' => 2, 'parent_id' => null, 'name' => 'Toys']]
         ];
     }
 }
