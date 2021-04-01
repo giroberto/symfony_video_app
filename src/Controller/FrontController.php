@@ -26,7 +26,7 @@ class FrontController extends AbstractController
     {
         $categories->getCategoryListAndParent($id);
         $videos = $this->getDoctrine()->getRepository(Video::class)->findAll();
-        return $this->render('front/video_list.html.twig', ['subcategories' => $categories]);
+        return $this->render('front/video_list.html.twig', ['subcategories' => $categories, 'videos' => $videos]);
     }
 
     
