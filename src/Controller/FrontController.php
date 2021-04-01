@@ -20,16 +20,16 @@ class FrontController extends AbstractController
     }
 
     /**
-     * @Route("/video-list/category/{categoryname},{id}", name="video_list")
+     * @Route("/video-list/category/{categoryname},{id}/{page}", defaults={"page": "1"}, name="video_list")
      */
-    public function videoList($id, CategoryTreeFrontPage $categories): Response
+    public function videoList($id, $page=1, CategoryTreeFrontPage $categories): Response
     {
+        $videos = $this->getDoctrine()->getRepository(Video::class)->findAllPaginated($page);
         $categories->getCategoryListAndParent($id);
-        $videos = $this->getDoctrine()->getRepository(Video::class)->findAll();
         return $this->render('front/video_list.html.twig', ['subcategories' => $categories, 'videos' => $videos]);
     }
 
-    
+
     /**
      * @Route("/video-details", name="video_details")
      */
@@ -72,7 +72,7 @@ class FrontController extends AbstractController
 
     public function getMainCategories(): Response
     {
-        $categories = $this->getDoctrine()->getRepository(Category::class)->findBy(['parent'=>null],['name'=>'ASC']);
-        return $this->render('front/_main_categories.html.twig', ['categories'=>$categories]);
+        $categories = $this->getDoctrine()->getRepository(Category::class)->findBy(['parent' => null], ['name' => 'ASC']);
+        return $this->render('front/_main_categories.html.twig', ['categories' => $categories]);
     }
 }
