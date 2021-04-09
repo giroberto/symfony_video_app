@@ -5,39 +5,15 @@ namespace App\Tests\Controllers;
 use App\Entity\Category;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Tests\Rollback;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class AdminControllersCategoryTest extends WebTestCase
 {
+    use Rollback;
     private KernelBrowser $client;
     private $entityManager;
-
-    protected function setUp(): void{
-        parent::setup();
-//        self::bootKernel();
-
-        $this->client = self::createClient();
-        $container = self::$container;
-        $repository = $container->get(UserRepository::class);
-        $testUser = $repository->find(1);
-        $this->client->loginUser($testUser);
-        $this->client->disableReboot();
-        $this->entityManager = $this->client->getContainer()->get('doctrine.orm.entity_manager');
-        $this->entityManager->beginTransaction();
-        $this->entityManager->getConnection()->setAutoCommit(false);
-
-
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->entityManager->rollback();
-        $this->entityManager->close();
-        $this->entityManager = null;
-
-    }
 
     public function testTextOnPage(): void
     {
@@ -49,7 +25,7 @@ class AdminControllersCategoryTest extends WebTestCase
     public function testNumberOfItems()
     {
         $crawler = $this->client->request('GET', '/admin/su/categories');
-        $this->assertCount(10, $crawler->filter('option'));
+        $this->assertCount(12, $crawler->filter('option'));
     }
 
     public function testCreateCategory()

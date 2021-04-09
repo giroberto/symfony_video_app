@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment;
+use App\Repository\VideoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,16 +32,19 @@ class FrontController extends AbstractController
         $ids = $categories->getChildIds($id);
         array_push($ids, $id);
         $videos = $this->getDoctrine()->getRepository(Video::class)->findByChildIds($ids, $page, $request->get('sortby'));
-        $categories->getCategoryListAndParent($id);
         return $this->render('front/video_list.html.twig', ['subcategories' => $categories, 'videos' => $videos]);
     }
 
     /**
-     * @Route("/video-details", name="video_details")
+     * @Route("/video-details/{video}", name="video_details")
      */
-    public function videoDetails(): Response
+    public function videoDetails(VideoRepository $repo, $video): Response
     {
-        return $this->render('front/video_details.html.twig');
+        dump($repo->videoDetails($video));
+        return $this->render('front/video_details.html.twig',
+            [
+                'video' => $repo->videoDetails($video)
+            ]);
     }
 
     /**
@@ -105,5 +110,23 @@ class FrontController extends AbstractController
     {
         $categories = $this->getDoctrine()->getRepository(Category::class)->findBy(['parent' => null], ['name' => 'ASC']);
         return $this->render('front/_main_categories.html.twig', ['categories' => $categories]);
+    }
+
+    /**
+     * @Route("/new-comment/{video}", methods={"POST"}, name="new_comment")
+     */
+    public function newComment(Video $video, Request $request)
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_REMEMBERED');
+        if (!empty(trim($request->request->get('comment')))) {
+            $comment = new Comment();
+            $comment->setContent(trim($request->request->get('comment')));
+            $comment->setUser($this->getUser());
+            $comment->setVideo($video);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($comment);
+            $em->flush();
+        }
+        return $this->redirectToRoute('video_details', ['video'=> $video->getId()]);
     }
 }

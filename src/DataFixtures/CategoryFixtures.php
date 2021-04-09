@@ -13,6 +13,7 @@ class CategoryFixtures extends Fixture
         $this->loadMainCategories($manager);
         $this->loadSubcategories($manager, 'Electronics', 1);
         $this->loadSubcategories($manager, 'Computers', 6);
+        $this->loadSubcategories($manager, 'Movies', 4);
     }
     
     private function loadMainCategories($manager){
@@ -60,6 +61,13 @@ class CategoryFixtures extends Fixture
         return [
             ["Laptops", 8],
             ["Desktops", 9]
+        ];
+    }
+
+    private function getMoviesData(){
+        return [
+            ["Family", 10],
+            ["Romantic", 11]
         ];
     }
 
