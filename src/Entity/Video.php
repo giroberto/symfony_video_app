@@ -35,7 +35,7 @@ class Video
     private $duration;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Category::class)
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="videos")
      */
     private $category;
 

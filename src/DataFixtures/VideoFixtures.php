@@ -29,7 +29,8 @@ class VideoFixtures extends Fixture
         $manager->flush();
     }
 
-    private function VideoData(){
+    private function VideoData(): array
+    {
         return [
             ['Movies 1',289729765,4],
             ['Movies 2',238902809,4],

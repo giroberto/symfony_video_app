@@ -15,18 +15,51 @@ use Knp\Component\Pager\PaginatorInterface;
  */
 class VideoRepository extends ServiceEntityRepository
 {
+    /**
+     * @var PaginatorInterface
+     */
+    private $paginator;
+
     public function __construct(ManagerRegistry $registry, PaginatorInterface $paginator)
     {
         parent::__construct($registry, Video::class);
         $this->paginator = $paginator;
     }
 
-    public function findAllPaginated($page)
+    public function findByChildIds(array $ids, int $page, ?string $sort_method)
     {
-        $dbquery = $this->createQueryBuilder('v')->getQuery();
+        $sort_method = ($sort_method != 'rating') ? $sort_method : 'ASC';
+        $dbquery = $this->createQueryBuilder('v')
+            ->andWhere('v.category IN (:val)')
+            ->setParameter('val', $ids)
+            ->orderBy('v.title', $sort_method)
+            ->getQuery();
 
-        $pagination = $this->paginator->paginate($dbquery, $page, 5);
-        return $pagination;
+        return $this->paginator->paginate($dbquery, $page, 5);
+    }
+
+    public function findByTitle(string $query, int $page, ?string $sort_method)
+    {
+        $sort_method = $sort_method != 'rating' ? $sort_method : 'ASC';
+
+        $querybuilder = $this->createQueryBuilder('v');
+
+        $searchTerms = $this->prepareQuery($query);
+
+        foreach ($searchTerms as $key => $term) {
+            $querybuilder->orWhere('v.title LIKE :t_' . $key)
+                ->setParameter('t_' . $key, '%' . trim($term) . '%');
+        }
+
+        $dbquery = $querybuilder->orderBy('v.title', $sort_method)->getQuery();
+
+        return $this->paginator->paginate($dbquery, $page, 5);
+    }
+
+    private function prepareQuery($query)
+    {
+        return explode(' ', $query);
+
     }
 
     // /**

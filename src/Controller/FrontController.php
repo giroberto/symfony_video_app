@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Category;
 use App\Entity\Video;
 use App\Utils\CategoryTreeFrontPage;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class FrontController extends AbstractController
 {
@@ -22,13 +24,15 @@ class FrontController extends AbstractController
     /**
      * @Route("/video-list/category/{categoryname},{id}/{page}", defaults={"page": "1"}, name="video_list")
      */
-    public function videoList($id, $page=1, CategoryTreeFrontPage $categories): Response
+    public function videoList($id, $page, CategoryTreeFrontPage $categories, Request $request): Response
     {
-        $videos = $this->getDoctrine()->getRepository(Video::class)->findAllPaginated($page);
+        $categories->getCategoryListAndParent($id);
+        $ids = $categories->getChildIds($id);
+        array_push($ids, $id);
+        $videos = $this->getDoctrine()->getRepository(Video::class)->findByChildIds($ids, $page, $request->get('sortby'));
         $categories->getCategoryListAndParent($id);
         return $this->render('front/video_list.html.twig', ['subcategories' => $categories, 'videos' => $videos]);
     }
-
 
     /**
      * @Route("/video-details", name="video_details")
@@ -41,9 +45,17 @@ class FrontController extends AbstractController
     /**
      * @Route("/login", name="login")
      */
-    public function login(): Response
+    public function login(AuthenticationUtils $helper): Response
     {
-        return $this->render('front/login.html.twig');
+        return $this->render('front/login.html.twig', ['error' => $helper->getLastAuthenticationError()]);
+    }
+
+    /**
+     * @Route("/logout", name="logout")
+     */
+    public function logout(): Response
+    {
+        return new \Exception();
     }
 
     /**
@@ -52,6 +64,25 @@ class FrontController extends AbstractController
     public function register(): Response
     {
         return $this->render('front/register.html.twig');
+    }
+
+    /**
+     * @Route ("/search-results/{page}", name="search_results", methods={"GET"}, defaults={"page":"1"})
+     */
+    public function searchResult($page, Request $request): Response
+    {
+        $videos = null;
+        if ($query = $request->get('query')) {
+            $videos = $this->getDoctrine()
+                ->getRepository(Video::class)
+                ->findByTitle($query, $page, $request->get('sortby'));
+            if (!$videos->getItems()) $videos = null;
+
+        }
+        return $this->render("front/search_results.html.twig", [
+            'videos' => $videos,
+            'query' => $query
+        ]);
     }
 
     /**
