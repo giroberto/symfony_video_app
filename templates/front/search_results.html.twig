@@ -1,5 +1,10 @@
 {% extends 'base.html.twig' %}
-
+{% block customStyleSheets %}
+    {{ parent() }}
+    {% if app.user %}
+        <link rel="stylesheet" href="{{ asset('assets/css/likes.css') }}">
+    {% endif %}
+{% endblock %}
 {% block main %}
     <section class="jumbotron text-center">
         <div class="container">
@@ -12,7 +17,13 @@
         </div>
     </section>
     {% if videos %}
-        {{  include('front/includes/_videos.html.twig') }}
+        {{ include('front/includes/_videos.html.twig') }}
         {{ knp_pagination_render(videos) }}
+    {% endif %}
+{% endblock %}
+{% block customJavascript %}
+    {{ parent() }}
+    {% if app.user %}
+        <script src="{{ asset('assets/js/likes.js') }}"></script>
     {% endif %}
 {% endblock %}

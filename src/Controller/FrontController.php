@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Controller\Traits\Likes;
 use App\Entity\Comment;
 use App\Repository\VideoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,10 +12,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Category;
 use App\Entity\Video;
 use App\Utils\CategoryTreeFrontPage;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class FrontController extends AbstractController
 {
+    use Likes;
     /**
      * @Route("/", name="main_page")
      */
@@ -45,30 +46,6 @@ class FrontController extends AbstractController
             [
                 'video' => $repo->videoDetails($video)
             ]);
-    }
-
-    /**
-     * @Route("/login", name="login")
-     */
-    public function login(AuthenticationUtils $helper): Response
-    {
-        return $this->render('front/login.html.twig', ['error' => $helper->getLastAuthenticationError()]);
-    }
-
-    /**
-     * @Route("/logout", name="logout")
-     */
-    public function logout(): Response
-    {
-        return new \Exception();
-    }
-
-    /**
-     * @Route("/register", name="register")
-     */
-    public function register(): Response
-    {
-        return $this->render('front/register.html.twig');
     }
 
     /**
@@ -128,5 +105,30 @@ class FrontController extends AbstractController
             $em->flush();
         }
         return $this->redirectToRoute('video_details', ['video'=> $video->getId()]);
+    }
+
+    /**
+     * @Route("/video-list/{video}/like", methods={"POST"}, name="like_video")
+     * @Route("/video-list/{video}/dislike", methods={"POST"}, name="dislike_video")
+     * @Route("/video-list/{video}/undo-like", methods={"POST"}, name="undo_like_video")
+     * @Route("/video-list/{video}/undo-dislike", methods={"POST"}, name="undo_dislike_video")
+     */
+    public function toggleLikesAjax(Video $video, Request $request){
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_REMEMBERED');
+        switch ($request->get('_route')){
+            case 'like_video':
+                $result = $this->likeVideo($video);
+                break;
+            case 'dislike_video':
+                $result = $this->dislikeVideo($video);
+                break;
+            case 'undo_like_video':
+                $result = $this->undoLikeVideo($video);
+                break;
+            case 'undo_dislike_video':
+                $result = $this->undoDislikeVideo($video);
+                break;
+        }
+        return $this->json(['action'=> $result, 'id'=> $video->getId()]);
     }
 }

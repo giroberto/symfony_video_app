@@ -3,15 +3,13 @@
 namespace App\Tests\Controllers;
 
 use App\Entity\Category;
-use App\Entity\User;
-use App\Repository\UserRepository;
-use App\Tests\Rollback;
+use App\Tests\RoleAdmin;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class AdminControllersCategoryTest extends WebTestCase
 {
-    use Rollback;
+    use RoleAdmin;
     private KernelBrowser $client;
     private $entityManager;
 

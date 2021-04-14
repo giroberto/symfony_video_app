@@ -2,12 +2,12 @@
 
 namespace App\Tests\Front;
 
-use App\Tests\Rollback;
+use App\Tests\RoleAdmin;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class FrontControllerCommentsTest extends WebTestCase
 {
-    use Rollback;
+    use RoleAdmin;
     
     public function testNotLoggedInUser(){
         self::ensureKernelShutdown(); //allow to create another client

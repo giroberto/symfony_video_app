@@ -74,12 +74,12 @@ class User implements UserInterface
      * @ORM\ManyToMany(targetEntity=Video::class, mappedBy="usersThatDontLike")
      * @ORM\JoinTable(name="dislikes")
      */
-    private $unlikedVideos;
+    private $dislikedVideos;
 
     public function __construct()
     {
         $this->likedVideos = new ArrayCollection();
-        $this->unlikedVideos = new ArrayCollection();
+        $this->dislikedVideos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -229,25 +229,25 @@ class User implements UserInterface
     /**
      * @return Collection|Video[]
      */
-    public function getUnlikedVideos(): Collection
+    public function getDislikedVideos(): Collection
     {
-        return $this->unlikedVideos;
+        return $this->dislikedVideos;
     }
 
-    public function addUnlikedVideo(Video $unlikedVideo): self
+    public function addDislikedVideo(Video $dislikedVideo): self
     {
-        if (!$this->unlikedVideos->contains($unlikedVideo)) {
-            $this->unlikedVideos[] = $unlikedVideo;
-            $unlikedVideo->addUsersThatDontLike($this);
+        if (!$this->dislikedVideos->contains($dislikedVideo)) {
+            $this->dislikedVideos[] = $dislikedVideo;
+            $dislikedVideo->addUsersThatDontLike($this);
         }
 
         return $this;
     }
 
-    public function removeUnlikedVideo(Video $unlikedVideo): self
+    public function removeDislikedVideo(Video $dislikedVideo): self
     {
-        if ($this->unlikedVideos->removeElement($unlikedVideo)) {
-            $unlikedVideo->removeUsersThatDontLike($this);
+        if ($this->dislikedVideos->removeElement($dislikedVideo)) {
+            $dislikedVideo->removeUsersThatDontLike($this);
         }
 
         return $this;

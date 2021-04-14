@@ -1,5 +1,11 @@
 {% extends 'base.html.twig' %}
-{% block main %}+
+{% block customStyleSheets %}
+    {{ parent() }}
+    {% if app.user %}
+        <link rel="stylesheet" href="{{ asset('assets/css/likes.css') }}">
+    {% endif %}
+{% endblock %}
+{% block main %}
     <main role="main">
 
         <section class="jumbotron text-center">
@@ -29,12 +35,14 @@
             </div>
         </section>
 
-        <div class="album py-5 bg-light">
-            <div class="container">
-                {{ include('front/includes/_videos.html.twig', {'videos': videos}) }}
-                {{ knp_pagination_render(videos) }}
-            </div>
-        </div>
+        {{ include('front/includes/_videos.html.twig', {'videos': videos}) }}
+        {{ knp_pagination_render(videos) }}
 
     </main>
+{% endblock %}
+{% block customJavascript %}
+    {{ parent() }}
+    {% if app.user %}
+        {{ encore_entry_script_tags('js/likes') }}
+    {% endif %}
 {% endblock %}

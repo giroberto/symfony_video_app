@@ -4,7 +4,7 @@ namespace App\Tests;
 
 use App\Repository\UserRepository;
 
-trait Rollback
+trait RoleAdmin
 {
     public function setUp(): void
     {

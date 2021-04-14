@@ -62,7 +62,7 @@ class Video
     private $usersThatLike;
 
     /**
-     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="unlikedVideos")
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="dislikedVideos")
      * @ORM\JoinTable(name="dislikes")
      */
     private $usersThatDontLike;
